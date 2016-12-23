@@ -10,7 +10,7 @@ library(RJDBC)
 library(DBI)
 library(rJava)
 
-userlist <-c("RandomTH-3179","머거본놈-31139","ksa-3943","wlsrud531-3918","yangrae-3284","틴팬강원래-3198","농촌계모임-3391","마키아울프-3387","쉑쉑감자-3831","더네임-3971")
+userlist <-c("RandomTH-3179","머거본놈-31139","ksa-3943","wlsrud531-3918","yangrae-3284","틴팬강원래-3198","농촌계모임-3391","마키아울프-3387","쉑쉑감자-3831","더네임-3971","HotDokk-1561")
 df_avg <- data.frame(NULL) #경쟁전 평균 스탯
 df_game <- data.frame(NULL) # 경쟁전 게임 스탯
 df_over <- data.frame(NULL) # 경쟁전 누적 스탯
