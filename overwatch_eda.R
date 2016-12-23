@@ -27,7 +27,28 @@ head(data_overall)
 # palcol<-pal(seq(0,1,len=10))
 
 ggplot(data=data_overall,aes(x=battletag,y=comprank,fill=battletag))+
-  geom_bar(stat="identity", position="identity", colour="white", width=1)+
+  geom_bar(stat="identity", position="identity", colour="white", width=0.5)+
   ggtitle("경쟁전 랭킹")
 
+#경쟁전 주요 스탯 데이터 가져오기
+data_comp_avg <- dbGetQuery(conn,"select battletag 
+                            ,eliminations_avg
+                            ,damage_done_avg
+                            ,deaths_avg
+                            ,final_blows_avg
+                            ,healing_done_avg
+                            ,objective_kills_avg
+                            ,objective_time_avg
+                            ,solo_kills_avg
+                            from user_compe_avg")
+#kmeans clustering
 
+data1 <- subset(data_comp_avg,select=c(battletag,eliminations_avg,deaths_avg))
+
+data1_z <- sapply(data1[,2:3],scale)
+data1_z <- cbind(data1$battletag,data1_z)
+colnames(data1_z)[1] <-c("battletag")
+data1_z <- as.data.frame(data1_z)
+data1_km <-kmeans(data1_z,3)
+plot(data1_z$deaths_avg,data1_z$eliminations_avg,type="n",xlab="죽음 평균",ylab="처치 평균")
+text(data1_z$deaths_avg,data1_z$eliminations_avg,labels=rownames(data1_z$battletag),cex=0.8,col=data1_km$cluster)
