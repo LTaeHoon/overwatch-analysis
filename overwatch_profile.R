@@ -5,12 +5,12 @@ library(dplyr)
 library(jsonlite)
 library(plyr)
 library(RMySQL)
-Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_111') 
+Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_101') 
 library(RJDBC)
 library(DBI)
 library(rJava)
 
-userlist <-c("RandomTH-3179","머거본놈-31139","ksa-3943","wlsrud531-3918","yangrae-3284","틴팬강원래-3198","농촌계모임-3391","마키아울프-3387","쉑쉑감자-3831","더네임-3971","HotDokk-1561")
+userlist <-c("RandomTH-3179","머거본놈-31139","ksa-3943","wlsrud531-3918","yangrae-3284","틴팬강원래-3198","농촌계모임-3391","마키아울프-3387","쉑쉑감자-3831","더네임-3971","HotDokk-1561","할만한데-3983")
 df_avg <- data.frame(NULL) #경쟁전 평균 스탯
 df_game <- data.frame(NULL) # 경쟁전 게임 스탯
 df_over <- data.frame(NULL) # 경쟁전 누적 스탯
@@ -55,7 +55,7 @@ names(df_over)[1]<- c('battletag')
 
 #db 연결 과정
 drv <- JDBC(driverClass="com.mysql.jdbc.Driver", 
-            classPath="C:\\NCS\\python\\util\\mysql-connector-java-5.1.40\\mysql-connector-java-5.1.40\\mysql-connector-java-5.1.40-bin.jar")
+            classPath="E:\\NCS\\python\\util\\mysql-connector-java-5.1.40\\mysql-connector-java-5.1.40\\mysql-connector-java-5.1.40-bin.jar")
 con <- dbConnect(drv, "jdbc:mysql://127.0.0.1:3306/overwatch", "scott", "tiger")
 
 #테이블 저장
@@ -69,4 +69,5 @@ dbWriteTable(con, "user_compe_over", df_over, append=TRUE, row.names =F)
 # result
 
 dbDisconnect(con)
+
 
