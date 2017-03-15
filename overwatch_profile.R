@@ -1,14 +1,14 @@
 #overwatch competitive stats data collection script
-
-library(RJSONIO)
-library(dplyr)
-library(jsonlite)
+install.packages("RJSONIO")
+library(RJSONIO) # JSON 데이터 입출력
+library(dplyr) #데이터 전처리
+library(jsonlite) #json 데이터 처리
 library(plyr)
-library(RMySQL)
-Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_101') 
-library(RJDBC)
-library(DBI)
-library(rJava)
+library(RMySQL) # DB 관련 
+Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_111') 
+library(RJDBC) # DB 관련
+library(DBI) # DB 관련
+library(rJava) # java vm 인터페이스 
 
 userlist <-c("RandomTH-3179","머거본놈-31139","ksa-3943","wlsrud531-3918","yangrae-3284","틴팬강원래-3198","농촌계모임-3391","마키아울프-3387","쉑쉑감자-3831","더네임-3971","HotDokk-1561","할만한데-3983")
 df_avg <- data.frame(NULL) #경쟁전 평균 스탯
@@ -55,7 +55,7 @@ names(df_over)[1]<- c('battletag')
 
 #db 연결 과정
 drv <- JDBC(driverClass="com.mysql.jdbc.Driver", 
-            classPath="E:\\NCS\\python\\util\\mysql-connector-java-5.1.40\\mysql-connector-java-5.1.40\\mysql-connector-java-5.1.40-bin.jar")
+            classPath="C:\\NCS\\python\\util\\mysql-connector-java-5.1.40\\mysql-connector-java-5.1.40\\mysql-connector-java-5.1.40-bin.jar")
 con <- dbConnect(drv, "jdbc:mysql://127.0.0.1:3306/overwatch", "scott", "tiger")
 
 #테이블 저장
@@ -70,7 +70,8 @@ dbWriteTable(con, "user_compe_over", df_over, append=TRUE, row.names =F)
 
 #1. 경쟁전 랭킹 시각화 
 # 데이터 가져오기
-data_overall <- dbGetQuery(conn,"select * from user_compe_over")
+library(ggplot2)
+data_overall <- dbGetQuery(con,"select * from user_compe_over")
 head(data_overall)
 
 # pal <- colorRamp(c("red","blue"))
@@ -82,7 +83,7 @@ p<-ggplot(data=data_overall,aes(x=battletag,y=comprank,fill=battletag))+
 p+geom_text(aes(label=comprank))
 
 #경쟁전 주요 스탯 데이터 가져오기
-data_comp_avg <- dbGetQuery(conn,"select battletag 
+data_comp_avg <- dbGetQuery(con,"select battletag 
                             ,eliminations_avg
                             ,damage_done_avg
                             ,deaths_avg
@@ -96,12 +97,12 @@ data_comp_avg <- dbGetQuery(conn,"select battletag
 #처치 평균과 죽음 평균을 이용한 군집분석
 data1 <- subset(data_comp_avg,select=c(battletag,eliminations_avg,deaths_avg))
 
-data1_km <-kmeans(data1[,2:3],3)
+data1_km <-kmeans(data1[,2:3],2)
 par(mfrow=c(1,1))
 plot(data1$deaths_avg,data1$eliminations_avg,type="n",xlab="죽음 평균",ylab="처치 평균")
 text(data1$deaths_avg,data1$eliminations_avg,labels=data1$battletag,cex=0.8,col=data1_km$cluster)
-points(data1_km$centers[,1:2], col="blue",pch=4,cex=2)
-
+points(x=data1_km$centers[,2],y=data1_km$centers[,1], col="blue",pch=4,cex=2)
+?points
 #Hierarchical agglomerative clustering
 #데이터 표준화
 data_comp_avg_z <- sapply(data_comp_avg[,2:9],scale)
@@ -115,12 +116,19 @@ d
 hClustdat<-hclust(d,method="average")
 names(hClustdat)
 plot(hClustdat,hang=-1,cex=.8,main="Average Linkage Clustering",labels=data_comp_avg$battletag)
-rect.hclust(hClustdat, k = 5)
-install.packages("NbClust")
-library(NbClust)
-nc <- NbClust(data_comp_avg_z[,2:9],distance="euclidean",min.nc=2,max.nc=15,method="average")
+rect.hclust(hClustdat, h = 3)
+cutree(hClustdat,h=3)
+data <-data.frame(BT = data_comp_avg$battletag,cluster = cutree(hClustdat,h=3))
+data[data$cluster==1,]
+data[data$cluster==2,]
+data[data$cluster==3,]
+data[data$cluster==4,]
 
-nc$Best.nc
+# install.packages("NbClust")
+# library(NbClust)
+# nc <- NbClust(data_comp_avg_z[,2:9],distance="euclidean",min.nc=2,max.nc=11,method="average")
+# 
+# nc$Best.nc
 
 #공격부분 - 딜/ 처지 그래프
 # 데이터 추출
